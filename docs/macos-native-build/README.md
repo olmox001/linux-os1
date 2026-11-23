@@ -70,3 +70,22 @@ The target is not merely “a kernel that boots”; it is a reproducible Linux-t
 The parent remote was empty during Step 0. Its first local bootstrap commit still referenced the 155 MB source archive, so GitHub correctly rejected the first push because the blob exceeded the 100 MB file limit.
 
 Because no parent commit had been published, the unpublished bootstrap history was replaced before the first successful push. The public parent history therefore starts from the submodule-based layout and never contains the kernel source archive.
+
+## Step 1 verified result
+
+The macOS-safe import is complete in kernel commit `697e31c0`.
+
+The importer is `tools/crosschain/import_linux_source.py`. It validates the archive checksum and transformed namespace before writing, applies the kernel path map while streaming the tarball, and can independently verify the materialized tree against the transformed archive.
+
+Verified results:
+
+- 13 case-only collision groups cataloged;
+- 13 upstream paths renamed to host-safe physical paths;
+- 15 source/build/documentation references updated;
+- 102,365 archive entries imported;
+- 96,081 regular-file/symlink entries compared against transformed archive data with zero mismatches;
+- 96,085 final git-tracked paths after restoring upstream files that match upstream `.gitignore` rules;
+- zero NFD+case-fold collisions in the final git index;
+- zero old build/include references outside the explicit logical-to-physical path manifest.
+
+The next step is the pinned macOS-host/Linux-target crosschain. Tool versions are selected from the imported kernel's own requirements rather than from host defaults.
